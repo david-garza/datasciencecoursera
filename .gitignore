@@ -1,0 +1,2 @@
+# Ignores the Rhistory file
+.R*
