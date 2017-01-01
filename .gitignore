@@ -1,2 +1,3 @@
 # Ignores the Rhistory file
 .R*
+household_power_consumption.txt
