@@ -1,0 +1,116 @@
+---
+title: "The Effect Of Supplements and Dose On Tooth Growth In Guinea Pigs"
+author: "David Garza"
+date: "11/14/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analysis
+
+## Overview
+
+This analysis will explore the default R data set **ToothGrowth** (Appendix: Data Set) and attempt to formulate and test hypotheses. 
+
+## Data Load and Cleaning
+
+The data is loaded into a data frame and inspected.
+```{r load}
+df<-ToothGrowth
+str(df)
+```
+
+From the information in the appendix, dose can only have 3 values and should be treated as a factor. For this study, it has been converted into a factor. 
+
+```{r clean}
+df$dose<-as.factor(df$dose)
+summary(df)
+```
+
+From the  data summary, we can see there are 6 different combinations of dose (3 levels) and supplement (2). Therefore, there could be 15 hypotheses to test in this data set.
+
+## Explortary Analysis
+
+The quickest way to reduce the number of hypotheses is to graph the data and observe any obvious trends. It is assumed the combination that produces greatest tooth cell length is ideal. 
+
+```{r boxplot, echo=FALSE}
+boxplot(df$len~df$supp*df$dose,main="Effects of Dose and Supplement on Tooth Cell Length",xlab="Dose",ylab = "Tooth Cell Length",col=c("orange","green"),names=c("0.5","0.5","1.0","1.0","2.0","2.0"))
+legend("bottomright",title="Supplement",c("Orange Juice","Vitamin C"),fill=c("orange","green"))
+```
+
+Three combinations produce the greatest tooth cell lengths. Both supplements at dose 2.0 mg/day and orange juice at dose 1.0 mg/day.
+
+### Hypothesis to Be Tested
+
+1. Orange juice and vitamin C are equal at the 2.0 mg/day dose
+2. Both supplements at 2.0 mg/day are greater than orange juice at 1.0 mg/day dose
+
+## Hypothesis Testing
+
+### Orange Juice and Vitamin C are Equally Effective at 2.0 mg/day Dose
+
+A student t-test is used to determine if both supplements are equally effective at 2.0 mg/day dose, with the following assumptions:
+
+1. H~o~: OJ2=VC2 or H~a~: OJ2!=VC2
+2. Groups are independent and not paired
+3. Variance is not equal
+
+```{r dose_2}
+oj2<-subset(df,supp=="OJ"& dose==2,select=len)
+vc2<-subset(df,supp=="VC"& dose==2,select=len)
+t.test(oj2,vc2,alternative = "two.sided",paired = FALSE,var.equal = FALSE)$p.value
+```
+
+The p-value is 0.96. Therefore, we can not reject H~o~ and may assume that orange juice and vitamin C are equally effective at the 2.0 mg/day dose.
+
+## Orange Juice at 2 mg/day is More Effective Than Orange Juice at 1 mg/day
+
+A student t-test is used to determine if orange juice at 2.0 mg/day is more effective than 1.0 mg/day dose, with the following assumptions:
+
+1. H~o~: OJ2=OJ1 or H~a~: OJ2>OJ1
+2. Groups are independent and not paired
+3. Variance is not equal
+
+```{r oj2_oj1}
+oj1<-subset(df,supp=="OJ"& dose==1,select=len)
+t.test(oj2,oj1,alternative = "greater",paired = FALSE,var.equal = FALSE)$p.value
+```
+
+The p-value is 0.02. Therefore, we can reject H~o~ and and accept H~a~ where orange juice dosed at 2.0 mg/day is more effective than at the 1.0 mg/day dose.
+
+## Vitamin C at 2 mg/day is More Effective Than Orange Juice at 1 mg/day
+
+A student t-test is used to determine if vitamin C at 2.0 mg/day is more effective than orange juice at 1.0 mg/day dose, with the following assumptions:
+
+1. H~o~: VC2=OJ1 or H~a~: VC2>OJ1
+2. Groups are independent and not paired
+3. Variance is not equal
+
+```{r vc2_oj1}
+t.test(vc2,oj1,alternative = "greater",paired = FALSE,var.equal = FALSE)$p.value
+```
+
+The p-value is about 0.05. This is border line reject at the 95% confidence level. Vitamin C at 2.0 mg/day may or many not be more effective than orange juice at 1.0 mg/day.
+
+## Conclusion
+
+Orange juice appears to be more effective than vitamin C in promoting tooth growth in guinea pigs at both 1.0 and 2.0 mg/day dose. Vitamin C matches orange juice only at the 2.0 mg/day dose.
+
+# Appendix
+
+## Data Set
+
+A summary of the **ToothGrowth** data can be found [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/ToothGrowth).
+
+> **Description of Data **  
+The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
+The dimensions of the data are 60 rows by 3 columns. The columns are tooth cell length, method of vitamin C delivery, and the dose in (mg/day). Each row is a guinea pig, and each subject is assumed to be independent. An example of the data is provided below.
+
+```{r data_view,echo=FALSE}
+head(ToothGrowth)
+```
+

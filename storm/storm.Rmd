@@ -1,0 +1,89 @@
+---
+title: "The Deadliest and Costliest Storm Events"
+author: "David Carlos Garza"
+date: "February 12, 2017"
+output: html_document
+---
+
+##Synopsis
+
+Severe weather events cause a great deal of personal harm and property damage each year. An understanding of which weather events are the most devestating to a community by loss of life, injuries, and cost to property is necessary for effective community planning. This analysis ranks the top ten weather events by loss of life, injury, and cost to property.
+
+##Data Analysis
+
+All analysis was done with the following:
+
+- R 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
+- RStudio 1.0.136
+- Windows 10 Home Version 1607 OS Build 14393.693
+- Intel(R) Core (TM) i7-4510U CPU @ 2.00GHz 2.60 GHz
+- 64-bit operating system, x64-based processor
+- Dell Inspiron 5447
+
+###Downloading and Extracting the Data
+
+The compressed zip file can be accessed from this location <https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2>
+
+``` {r data_load}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2","data.csv.bz2")
+data <- read.csv(bzfile("data.csv.bz2"))
+```
+
+###Determine which events caused the most fatalities and injuries
+
+Tapply was used to sum fatalities by type. The data was then sorted by decreasing number of fatalities and then the top ten were pulled from the list.
+
+``` {r fatality}
+fatality <- tapply(data$FATALITIES, data$EVTYPE, sum)
+fatality <- sort(fatality, decreasing = TRUE)
+fatality_10 <- fatality[1:10]
+```
+
+Tapply was then used to determine which events caused the most injuries. The data was then sorted then the top ten were pulled to create a new vector.
+
+``` {r injuries}
+injury <- tapply(data$INJURIES, data$EVTYPE, sum)
+injury <- sort(injury, decreasing = TRUE)
+injury_10 <- injury[1:10]
+```
+
+A barplot was chosen to show the results for the fatalities and injuries
+
+`barplot(fatality_10,cex.names = .5, col = "red", main = "Top 10 Weather Events by Fatality")`
+`barplot(injury_10,cex.names = .5, col = "orange", main = "Top 10 Weather Events by Injury")`
+
+###Deterine which events are the most expensive
+
+Tapply was used to sum the property damage cost column by eventype. The data was then sorted then the top ten were pulled to create a new vector.
+
+``` {r cost}
+cost <- tapply(data$PROPDMG, data$EVTYPE, sum)
+cost <- sort(cost, decreasing = TRUE)
+cost_10 <- cost[1:10]
+```
+
+Again the bar plot was chosen to plot the data
+
+`barplot(cost_10,cex.names = .5, col = "green", main = "Top 10 Weather Events by Cost")`
+
+##Results
+
+The plot below shows the top 10 most lethal weather events. Tornados by far have been the most lethal weather event in the USA.
+
+``` {r fatalityplot, echo = FALSE}
+barplot(fatality_10,cex.names = .5, col = "red", main = "Top 10 Weather Events by Fatality")
+```
+
+The plot below shows the top 10 most injury causing weather events. Tornados cause the most injuries by far. This is most likely due to the large about of wind driven projectiles.
+
+``` {r injuryplot, echo = FALSE}
+barplot(injury_10,cex.names = .5, col = "orange", main = "Top 10 Weather Events by Injury")
+```
+
+The plot below shows the top 10 weather events by cost due to property damage. Again, tornados are by the the most costly weather event.
+
+``` {r costplot, echo = FALSE}
+barplot(cost_10,cex.names = .5, col = "green", main = "Top 10 Weather Events by Cost")
+```
+
+In conclusion, the most dangerous weather event to a community by heatlh and cost is tornados.

@@ -1,3 +1,4 @@
-# Ignores the Rhistory file
-.R*
+# Add list of files or wild card files to ignore for tracking
+.Rdata
+.Rhistory
 household_power_consumption.txt

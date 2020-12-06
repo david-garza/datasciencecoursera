@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# Plotting practice script. 2017/02/03. By David Carlos Garza\n\n# Plot 1 what is the relationship between mean covered charges (Average.Covered.Charges) and mean total payments (Average.Total.Payments) in New York?\n\nplot1 <- function(){\n  \n  # Read data\n  df <- read.csv(\"payments.csv\")\n  \n  # Subset the data set to NY state only\n  ny <- subset.data.frame(df, df$Provider.State == \"NY\")\n  \n  # Open the pdf plotting device\n  \n  pdf(\"plot1.pdf\")\n  \n  boxplot(log(ny$Average.Covered.Charges), log(ny$Average.Total.Payments), names = c(\"Average Covered Cost\",\"Average Total Payments\"), ylab = \"Log of Cost\", main = \"Covered Cost as Compared to Total Payments\")\n  \n  # Close the plotting Device\n  dev.off()\n}",
+    "created" : 1486159590435.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "883878419",
+    "id" : "1D32B796",
+    "lastKnownWriteTime" : 1486161472,
+    "last_content_update" : 1486161472388,
+    "path" : "~/Programming/practice_plot/plot.R",
+    "project_path" : "plot.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

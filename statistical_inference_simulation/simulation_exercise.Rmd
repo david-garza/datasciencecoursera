@@ -1,0 +1,133 @@
+---
+title: 'Statistical Inference Course Project: Simulation Exercise'
+author: "David Garza"
+date: "11/12/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r constant, echo=FALSE}
+lambda<-0.2
+n<-1000
+k<-40
+set.seed(1234)
+```
+
+## Overview
+
+This project will investigate the population mean and standard deviation of the exponential distribution against sample means and standard deviations computed from Monte Carlo simulation of the exponential distribution.
+
+The second objective is to show that the distribution of the sample means of the simulation fits a normal distribution even though the exponential distribution itself is not normally distributed. Please see appendix 1 for more information on the exponential distribution.
+
+## Simulations
+
+The exponential distribution will be simulated using the R function **rexp(n,$\lambda$)**. Where *n* is the number of observations to be generated and *$\lambda$* is the rate. For this particular simulation, *n* = 1,000 and *$\lambda$*=0.2. For more information on the **rexp()** function please see appendix 2.
+
+The general method for the simulations is:
+
+1. Call **rexp(n,$\lambda$)** 40 times
+2. Store the values into a vector
+3. Convert the vector into a matrix where each row is one simulation of 1,000 observations
+
+The R code to simulate and store the data is:
+```{r simulation}
+obs<-NULL
+for(i in 1:k) obs<-c(obs,rexp(n,lambda))
+obs<-matrix(obs,k,n)
+```
+
+## Sample Mean versus Theoretical Mean
+
+The theoretical mean of the exponential distribution is $1/\lambda$. With a $\lambda$ of 0.2 the expected $\mu$ is 5.
+
+The distribution of the sample means is below.
+
+```{r hist_means,echo=FALSE}
+hist(apply(obs,1,mean),main=paste("Histogram of 40 Sample Means"),xlab="Observation")
+```
+
+
+The sample mean is computed by finding the mean for each row of the matrix *obs* and then finding the average of averages. This can all be done in one step using t.test and pulling the appropriate items. The function **apply()** computes the means for each row of the matrix and returns a vector of means.
+
+```{r t_test_mean}
+results<-t.test(apply(obs,1,mean),alternative ="two.sided",mu=5)
+results$estimate
+results$conf.int
+```
+
+The estimate is very close to the expected value of 5 and falls within the 95% confidence interval. Therefore we can not reject H~o~, where H~o~: $\mu=5$.
+
+
+## Sample Variance versus Theoretical Variance
+
+The theoretical variance of the exponential distribution is $1/\lambda$. With a $\lambda$ of 0.2 the expected $\sigma$ is 5.
+
+The distribution of the sample variances is below.
+
+```{r hist_variance,echo=FALSE}
+hist(apply(obs,1,sd),main=paste("Histogram of 40 Sample Variances"),xlab="Observation")
+```
+
+The sample variance is computed by finding the variance for each row of the matrix *obs* and then finding the average of variances. This can all be done in one step using t.test and pulling the appropriate items. The function **apply()** computes the variance for each row of the matrix and returns a vector of variances.
+
+```{r t_test_variance}
+results<-t.test(apply(obs,1,sd),alternative ="two.sided",mu=5)
+results$estimate
+results$conf.int
+```
+
+The estimate is very close to the expected value of 5 and falls within the 95% confidence interval. Therefore we can not reject H~o~, where H~o~: $\sigma=5$.
+
+## Distribution
+
+The asymptotic argument will be used to determine if the distribution of sample means is normal. It is assumed as the sample size increases then the distribution of the sample means will fit a normal curve.
+
+```{r increasing_samples, echo=FALSE}
+mns40<-apply(obs,1,mean)
+mns1000<-NULL
+k<-1000
+for(i in 1:k) mns1000<-c(mns1000,mean(rexp(n,lambda)))
+```
+
+As can be seen, the distribution of the sample means approaches a normal distribution as the sample size increases.
+
+```{r increasing_plots, echo=FALSE}
+par(mfcol=c(1,2))
+hist(mns40,freq = FALSE,main ="40 Sample Means",ylim = range(0,2.5),xlab = "Observations")
+x<-seq(min(mns40),max(mns40),by=(max(mns40)-min(mns40))/100)
+lines(x,dnorm(x,mean=mean(mns40),sd=sd(mns40)),col="red")
+
+hist(mns1000,freq = FALSE,main ="1000 Sample Means",ylim = range(0,2.5), xlab = "Observations")
+x<-seq(min(mns1000),max(mns1000),by=(max(mns1000)-min(mns1000))/100)
+lines(x,dnorm(x,mean=mean(mns1000),sd=sd(mns1000)),col="red")
+```
+
+# Appendix
+
+## 1 Exponential Distribution
+
+```{r exponential, echo=FALSE}
+plot(type="l",x= 1:25,y=dexp(1:25,rate=lambda),main=expression(paste("Exponential Distribution, ",lambda,"=0.2")),xlab = "Values",ylab="Density")
+abline(v=1/lambda)
+text(5.3,.10,expression(paste(mu,"=",5)),adj=0)
+```
+
+The exponential distribution is similar to an exponential decay curve. Smaller values are more probable than larger values. It is defined as $d=\lambda e^{-\lambda x}$. It is clearly not normal. With $\lambda$ set to `r lambda`, $\mu$ and $\sigma$ are `r 1/lambda`.
+
+## 2 rexp() Function
+
+The **rexp(n,$\lambda$)** generates random numbers using the exponential distribution (see appendix 1). An example of the output is provided below:
+
+```{r rexp_example}
+head(rexp(n,lambda))
+```
+
+Below is the histogram of one simulation of **rexp(n,$\lambda$)**. Notice it follows the distribution of the ideal exponential distribution, but there is some noise and variation from the ideal.
+
+```{r single_run_hist, echo=FALSE}
+hist(rexp(n,lambda),freq = FALSE,main = paste("Histogram of" , "1 Simulation"),xlab = "Values")
+```
+
