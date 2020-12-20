@@ -1,0 +1,127 @@
+---
+title: "Effect of Transmission Type on MPG Performance"
+author: "David Garza"
+date: "12/6/2020"
+output: pdf_document
+fig_width: 5
+fig_height: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r data, echo=FALSE}
+# Loads the data for analysis and formats cyl and am to factors, gear and carb to integers
+df <-mtcars
+df$cyl<-as.factor(df$cyl)
+df$am<-as.factor(df$am)
+df$vs<-as.factor(df$vs)
+df$gear<-as.integer(df$gear)
+df$carb<-as.integer(df$carb)
+```
+
+```{r models, echo=FALSE}
+fit_min<-lm(mpg~am,data=df)
+fit_max<-lm(mpg~.,data=df)
+fit_cyl<-lm(mpg~am+cyl,data=df)
+fit_drat<-lm(mpg~am+drat,data=df)
+fit_drat_cyl<-lm(mpg~am+drat+cyl,data=df)
+fit_wt<-lm(mpg~am+wt,data=df)
+fit_wt_cyl<-lm(mpg~am+wt+cyl,data=df)
+fit_wt_cyl_disp<-lm(mpg~am+wt+cyl+disp,data=df)
+fit_wt_cyl_hp<-lm(mpg~am+wt+cyl+hp,data=df)
+fit_wt_cyl_vs<-lm(mpg~am+wt+cyl+vs,data=df)
+fit_wt_vs<-lm(mpg~am+vs,data=df)
+```
+
+## Executive Summary
+
+The question this report attempts to answer is "Is an automatic or manual transmission better for MPG?" and if true "Quantify the MPG difference between automatic and manual transmissions." The winning model that best fit the data predicted a difference between manual and automatic transmission of 0.15 MPG with a standard error of 1.3 MPG and a p-value of 0.9.  The other regressors in the model, vehicle weight and number of cylinders, had a larger effect on MPG performance. Given the data and model used, the null hypothesis that automatic and manual transmissions are equal in MPG performance can not be rejected.
+
+## Model Selection Process
+
+A correlation matrix identified possible relationships between the regressors and the response, MPG. The correlation matrix also identified possible correlations between the regressors that could create over fitting. 
+
+Several combinations of regressors were tried and evaluated by their adjusted r^2^ scores. All of the models included transmission type and regressors that accounted for engine and car size. 
+
+The variance inflation factors were tested to see if too many variables were added and possible correlations between variables. 
+
+ANOVA testing was used on nested models to see which model added the most informative independent regressors.
+
+The residuals, hat-values, and delta betas didn't show anything serious problems with the winning model. The residuals are random across the measured values and no strong outliers were detected in the hat-values or delta betas.
+
+This process is displayed in the appendix of this report.
+
+## Model Details
+
+The model is built where the intercept is a four cylinder engine car with 0 weight using automatic transmission. It was found that the other regressors all described the size of the engine or the car. By trying several models, it was found that number of cylinders best accounted for the size of the engine and weight of the car accounted for the weight of the car. Additional regressors didn't add additional information.
+
+The results of the model coefficients are shown below. The coefficient am1 is the additional gain in mpg of 0.15 MPG for using a manual transmission. The difference is not significant. The addition of 6 or 8 cylinders, -4.3 and -6.1 MPG respectively, is a much larger impact and is significant. The same can be said of car weight.
+
+```{r model_summary,echo=FALSE}
+round(summary(fit_wt_cyl)$coef,3)
+```
+
+## Experimental Improvements
+
+The results may be muddled due to the confounding of car weight and engine size. The ideal case would be a pair wise experiment where each model of car has both a manual and automatic version. The cars would be tested by either the same driver, or group of drivers that is rotated among the cars to remove differences in driving style. 
+
+This experimental design would also remove the effect of car weight and engine size leaving only the effect of transmission type on MPG performance.
+
+# Appendix
+
+## Exploratory Analysis MPG Performance Plots
+
+```{r mpg, echo=FALSE,fig.height=6,fig.width=6}
+par(mfcol=c(2,1))
+boxplot(mpg~am,data=df,main="MPG vs Transmission Type",xlab = "Transmission Type",ylab = "MPG",names=c("Auto","Manual"),col=c("red","blue"))
+boxplot(mpg~am+cyl,data=df,main="MPG vs Transmission Type and Number of Cylinders",xlab = "Number of Cylinders",ylab = "MPG",col=c("red","blue"),names=c("4","4","6","6","8","8"))
+legend("topright",legend = c("Auto","Manual"),fill =c("red","blue"))
+```
+
+## Correlation Matrix
+
+```{r correlation,echo=FALSE}
+round(cor(mtcars),2)
+```
+
+## Variance Inflation Factor of Model With All Regressors
+
+```{r overfitting, echo=FALSE,warning=FALSE,message=FALSE}
+library(car)
+round(vif(fit_max)[,3],2)
+```
+
+## Model Scoring by Adjusted R^2^
+
+```{r scoring, echo=FALSE}
+q<-data.frame(model="cyl",r.squared=summary(fit_cyl)$r.squared,adj.r.squared=summary(fit_cyl)$adj.r.squared)
+q<-rbind(q,c("drat",r.squared=summary(fit_drat)$r.squared,adj.r.squared=summary(fit_drat)$adj.r.squared))
+q<-rbind(q,c("drat_cyl",r.squared=summary(fit_drat_cyl)$r.squared,adj.r.squared=summary(fit_drat_cyl)$adj.r.squared))
+q<-rbind(q,c("max",r.squared=summary(fit_max)$r.squared,adj.r.squared=summary(fit_max)$adj.r.squared))
+q<-rbind(q,c("min",r.squared=summary(fit_min)$r.squared,adj.r.squared=summary(fit_min)$adj.r.squared))
+q<-rbind(q,c("wt",r.squared=summary(fit_wt)$r.squared,adj.r.squared=summary(fit_wt)$adj.r.squared))
+q<-rbind(q,c("wt_cyl",r.squared=summary(fit_wt_cyl)$r.squared,adj.r.squared=summary(fit_wt_cyl)$adj.r.squared))
+q<-rbind(q,c("wt_cyl_disp",r.squared=summary(fit_wt_cyl_disp)$r.squared,adj.r.squared=summary(fit_wt_cyl_disp)$adj.r.squared))
+q<-rbind(q,c("wt_cyl_hp",r.squared=summary(fit_wt_cyl_hp)$r.squared,adj.r.squared=summary(fit_wt_cyl_hp)$adj.r.squared))
+q<-rbind(q,c("wt_cyl_vs",r.squared=summary(fit_wt_cyl_vs)$r.squared,adj.r.squared=summary(fit_wt_cyl_vs)$adj.r.squared))
+q<-rbind(q,c("wt_vs",r.squared=summary(fit_wt_vs)$r.squared,adj.r.squared=summary(fit_wt_vs)$adj.r.squared))
+q[,c(1,3)]
+```
+
+## ANOVA Test for Bias
+
+```{r underfit, echo=FALSE}
+anova(fit_min,fit_wt,fit_wt_cyl,fit_wt_cyl_hp)
+```
+
+## Diagnostics for Weight and Cylinder Model
+
+```{r residuals, echo=FALSE, fig.height=7}
+par(mfcol=c(3,1))
+plot(fitted(fit_wt_cyl),residuals(fit_wt_cyl),main="Residual Plot",xlab="Fitted MPG",ylab="Resdiual")
+abline(h=0)
+plot(hatvalues(fit_wt_cyl),main="Hat-Values", ylab="Hat-Values")
+plot(dfbetas(fit_wt_cyl)[,2],main="Transmission Coefficient",ylab="Delta")
+```
