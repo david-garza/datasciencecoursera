@@ -1,0 +1,140 @@
+---
+title: "Exercise Quality Identification"
+author: "David Garza"
+date: "1/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning=FALSE,message=FALSE)
+```
+
+```{r data, echo=FALSE, cache=TRUE}
+url_data<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+url_newdata<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+data<-read.csv(url_data)
+newdata<-read.csv(url_newdata)
+rm(url_data,url_newdata)
+```
+
+```{r partition, echo=FALSE}
+set.seed(12345)
+library(caret)
+inTrain<-createDataPartition(y=data$classe,p=.7,list=FALSE)
+train<-data[inTrain,]
+valtest<-data[-inTrain,]
+inValidation<-createDataPartition(y=valtest$classe,p=.5,list=FALSE)
+validation<-valtest[inValidation,]
+test<-valtest[-inValidation,]
+
+# Remove duplicate data to save space in memory
+rm(data,valtest,inTrain,inValidation)
+```
+
+```{r datawrangle, echo=FALSE}
+# change the classe variable to factors in all 3 data sets
+train$classe<-as.factor(train$classe)
+validation$classe<-as.factor(validation$classe)
+test$classe<-as.factor(test$classe)
+
+# File for other data wrangling tools
+source('C:/Users/David/Git/datasciencecoursera/machine_learning_project/wrangler.R')
+
+#Correct columns that have the text #DIV/0!
+train<-diverror(train)
+validation<-diverror(validation)
+test<-diverror(test)
+
+# Exclude columns that have more that 50% NA and no useful data
+columns<--c(1:7,160,badcol(train))
+```
+
+```{r preProcess, echo=FALSE}
+preproctrain<-preProcess(x=train[,columns],method = c("knnImpute","zv","center","scale","pca"))
+proctrain<-predict(preproctrain,train[,columns])
+procvalidation<-predict(preproctrain,validation[,columns])
+proctest<-predict(preproctrain,test[,columns])
+```
+
+
+```{r modeling, echo=FALSE, cache=TRUE,results='hide'}
+set.seed(12345)
+model_rpart<-train(y=train$classe,x=proctrain,method="rpart")
+model_ranger<-train(y=train$classe,x=proctrain,method="ranger")
+```
+
+## Abstract
+
+This project asks if data from wearable devices such as Fitbits can accurately predict the quality of curls. The data is the orientation and acceleration recorded from sensors attached to the body.
+
+Volunteers performed curls in 5 different ways. Method A is the correct method while B-E are common mistakes in form. 
+
+Given there are 5 categories, decision trees were the first model for classification. The basic decision tree had terrible performance. It never predicted forms B and C.
+
+A second attempt used random forest. The training time was 1 to 2 hours, but the model had a 0.98 out of sample accuracy. This was the final model used to predict the 20 new observations.
+
+Random forest is an extremely successful model in predicting the quality of curls from wearable sensors.
+
+## Data Processing
+
+### Partitioning
+
+Data was downloaded from https://d396qusza40orc.cloudfront.net/predmachlearn/. The data was partitioned into 3 sets, training, validation, and testing. Validation was used to fine tune model selection. The testing data set was used to compute the out of sample error.
+
+### Wrangling
+
+The classe variable was converted into a factor data type. Columns 1 through 7 describe the time of test or test subject and has nothing to do with the physical movements of the body and were ignored for the rest of the analysis.
+
+Several custom functions were written to correct #DIV/0! and remove columns that had more than 50% missing data.
+
+### Preprocessing
+
+The caret preProcess function was used to impute missing values, remove columns with constant values, center, scale, and reduce the data set using PCA. PCA was used to reduce the number of variables to help reduce the processing time during the training of models.
+
+### Model Selection
+
+*Decision Tree*
+
+Decision tree model _rpart_ never predicted class B or C resulting in an accuracy of about 0.38 on the validation set.
+
+*Random Forest*
+
+Initial attempts at running random forest model _rf_ took too long. The random forest model _ranger_ which applies fast implementation was used instead. Even with optimization, training of the model took about 1.5 hours. _Ranger_ accuracy was about .98 on the validation sets. Given the high accuracy, this was the model chosen as the final model.
+
+## Out of Sample Error 
+
+The final _ranger_ model was tested on the final testing show that the accuracy can be no better than 0.98
+
+## Appendix: Figures
+
+### Decision Tree _rpart_ Performance on Validation
+
+```{r rpart_results, echo=FALSE}
+rpart_results<-confusionMatrix(predict(model_rpart,procvalidation),validation$classe)
+rpart_results$table
+rpart_results$overall[1]
+```
+
+### Random Forest _ranger_ Performance on Validation
+
+```{r ranger_results, echo=FALSE}
+ranger_results<-confusionMatrix(predict(model_ranger,procvalidation),validation$classe)
+ranger_results$table
+ranger_results$overall[1]
+```
+
+### Random Forest _ranger_ Out of Sample Error
+
+```{r ranger_oose, echo=FALSE}
+ranger_results<-confusionMatrix(predict(model_ranger,proctest),test$classe)
+ranger_results$table
+ranger_results$overall[1]
+```
+
+## Citation
+
+_Data Source_
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+Read more: http:/groupware.les.inf.puc-rio.br/har#ixzz4TjqloVkv
