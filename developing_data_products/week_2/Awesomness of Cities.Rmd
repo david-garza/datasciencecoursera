@@ -1,0 +1,29 @@
+---
+title: "The Awesomeness of Texas Cities"
+author: "David Garza"
+date: "2/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,warning = FALSE, message = FALSE)
+```
+
+```{r load_leaflet}
+library(leaflet)
+```
+
+## Purpose
+
+This is a very unscientific study graphing the coolness of Texas cities as compared to each other. A larger circle indicates that the city is more awesome / cool.
+
+## February 10, 2021
+
+```{r map}
+df<-read.csv("data.csv")
+m<-leaflet(df)
+m<-setView(m,lng = -99.9018,lat = 31.9686, zoom = 5)
+m<-addTiles(m)
+addCircleMarkers(m,radius = ~coolness/5,label = ~coolness)
+```
+

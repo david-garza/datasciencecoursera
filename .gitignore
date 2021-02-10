@@ -2,4 +2,7 @@
 *.Rdata
 *.Rhistory
 *.Rproj
+*.pdf
+*.txt
+*.jpg
 .Rproj.user
