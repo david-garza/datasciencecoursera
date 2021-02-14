@@ -2,7 +2,9 @@
 title: "The Effect Of Supplements and Dose On Tooth Growth In Guinea Pigs"
 author: "David Garza"
 date: "11/14/2020"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +38,7 @@ From the  data summary, we can see there are 6 different combinations of dose (3
 
 The quickest way to reduce the number of hypotheses is to graph the data and observe any obvious trends. It is assumed the combination that produces greatest tooth cell length is ideal. 
 
-```{r boxplot, echo=FALSE}
+```{r boxplot, echo=TRUE}
 boxplot(df$len~df$supp*df$dose,main="Effects of Dose and Supplement on Tooth Cell Length",xlab="Dose",ylab = "Tooth Cell Length",col=c("orange","green"),names=c("0.5","0.5","1.0","1.0","2.0","2.0"))
 legend("bottomright",title="Supplement",c("Orange Juice","Vitamin C"),fill=c("orange","green"))
 ```

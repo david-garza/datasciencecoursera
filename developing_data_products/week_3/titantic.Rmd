@@ -1,0 +1,44 @@
+---
+title: "Titanic Survivor Analysis"
+author: "David Garza"
+date: "2/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(plotly)
+library(vcdExtra)
+```
+
+## Data
+
+The data is one of the basic R data sets. It is a break down of the survivors of the Titanic organized by passenger class, age, and sex.
+
+## Plotty plots
+
+```{r ploty}
+# Titanic survivors by passenger class
+df<-as.data.frame(Titanic)
+df<-expand.dft(df,freq = "Freq")
+g<-ggplot(df)
+g<-g+labs(title = "Titanic Survivor Counts by Passenger Class")+geom_bar(aes(Class,fill=Survived))
+status<-ggplotly(g)
+status
+
+#By sex
+g<-ggplot(df)
+g<-g+labs(title = "Titanic Survivor Counts by Sex")+geom_bar(aes(Sex,fill=Survived))
+sex<-ggplotly(g)
+sex
+
+#By age
+g<-ggplot(df)
+g<-g+labs(title = "Titanic Survivor Counts by Age")+geom_bar(aes(Age,fill=Survived))
+age<-ggplotly(g)
+age
+
+
+```
+
