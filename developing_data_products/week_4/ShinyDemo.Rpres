@@ -1,0 +1,49 @@
+Shiny App Demo for Coursera Data Science Class
+========================================================
+author: David Carlos Garza
+date: 02/28/2021
+autosize: true
+
+Purpose
+========================================================
+
+The Shiny app performs the following:
+
+- Show my ability to create a simple Shiny app
+- Simple example of factor selection and its impact on linear regression modeling
+- Show my ability in creating this reproducible presentation
+
+Data
+========================================================
+
+The _warpbreaks_ data describes how often warps break while weaving. The factors that determine the number of occurrences of warp breaks are tension and wool type. A summary of the data is provided.
+
+```{r, echo=FALSE}
+summary(warpbreaks)
+```
+
+Exploratory Analysis
+========================================================
+The shiny app includes a plot for exploratory analysis. The user selects the factors of interest and then a box plot with the selected factors appears. An example box plot is provided.
+
+```{r, echo=FALSE}
+boxplot(breaks~tension+wool,data=warpbreaks,
+                    main="Number of Warp Breaks vs Level of Tension and Wool Type",
+                    names=c("Low A","Low B", "Medium A","Medium B", "High A","High B"),
+                    xlab = "Tension : Wool Type",
+                    ylab = "Number of Breaks",
+                    col="purple")
+```
+
+Linear Regression Model
+========================================================
+
+A linear regression model is also run to determine if their are significant differences in the number of warp breaks dependent on wool type and tension. An example is provided below.
+
+```{r}
+model1<-lm(breaks~wool+tension,data=warpbreaks)
+summary1<-summary(model1)
+summary1$coefficients
+```
+
+
