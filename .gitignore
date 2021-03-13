@@ -6,3 +6,5 @@
 *.txt
 *.jpg
 .Rproj.user
+*.zip
+*_cache

@@ -1,0 +1,50 @@
+---
+title: "Capstone"
+author: "David Garza"
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Capstone Log
+
+## Getting the Data and Cleaning 
+
+This file for myself to log all that I did for the capstone project. It is to ensure that it is reproducible.
+
+```{r download_training, cache=TRUE}
+#First step is to download the training data
+link<-"https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
+download.file(link,"Coursera-SwiftKey.zip")
+unzip("Coursera-SwiftKey.zip")
+```
+
+Get some basic statistics on the number of lines in each file.
+
+```{r read_files, message=FALSE, warning=FALSE}
+library(R.utils) #Utility package to allow the counting of lines in a file
+#Paths to the files in question
+blogs<-"final/en_US/en_US.blogs.txt"
+news<-"final/en_US/en_US.news.txt"
+twitter<-"final/en_US/en_US.twitter.txt"
+# Line counts
+countLines(blogs)
+countLines(news)
+countLines(twitter)
+```
+
+### Create a subset
+
+The text file are too large to read into a an editor. I will use sampling to reduce the file down to .25
+
+```{r sample}
+#Load the data into a df
+df<-readLines(blogs,countLines(blogs))
+set.seed(12345)
+#Sample 25% of the data
+sample_blog<-sample(df,.25*countLines(blogs))
+```
+
