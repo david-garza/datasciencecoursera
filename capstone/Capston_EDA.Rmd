@@ -1,0 +1,71 @@
+---
+title: "Capstone Exploratory Analysis"
+author: "David Garza"
+date: "3/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r get_data}
+#Assumes that the data has already been downloaded and unzipped
+blogs_txt<-"final/en_US/en_US.blogs.txt"
+news_txt<-"final/en_US/en_US.news.txt"
+twitter_txt<-"final/en_US/en_US.twitter.txt"
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+#Load libraries that will be used in this analysis
+library(R.utils)
+library(tm)
+```
+
+
+
+# Purpose Exploratory Analysis
+
+This analysis is intended to provide an clear understanding of what the data is and what can be done with it. 
+
+Objectives of the analysis:
+
+1. Number of lines in each file
+2. Tokenize the lines into words
+3. Perform word counts on the tokens
+4. Measure word frequency
+5. Measure 2-gram frequency
+6. Measure 3-gram frequency
+
+# Data Summary
+
+## Line Counts
+
+The documents have the following number of lines.These files are too large to process and will need to be sampled to create smaller data sets.
+
+```{r linecounts}
+blog_line<-countLines(blogs_txt)
+news_line<-countLines(news_txt)
+twitter_line<-countLines(twitter_txt)
+data.frame(Source=c("blog.txt","news.txt","twitter.txt"),Lines=c(blog_line[1],news_line[1],twitter_line[1]))
+```
+
+```{r sampling, warning=FALSE}
+# Create sample of the blogs data
+con<-file(blogs_txt,open="rt")
+df<-readLines(con)
+close(con)
+set.seed(312021)
+blogs<-sample(df,.10*length(df))
+
+#Create sample of the news data.
+
+
+```
+
+
+# Appendix
+
+## Data
+
+The data can be found [https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip](https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip)

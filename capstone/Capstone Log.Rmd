@@ -38,11 +38,11 @@ countLines(twitter)
 
 ### Create a subset
 
-The text file are too large to read into a an editor. I will use sampling to reduce the file down to .25
+The text file are too large to read into a an editor. I will use sampling to reduce the file down to .25 of its original size.
 
 ```{r sample}
 #Load the data into a df
-df<-readLines(blogs,countLines(blogs))
+df<-readLines(blogs)
 set.seed(12345)
 #Sample 25% of the data
 sample_blog<-sample(df,.25*countLines(blogs))
